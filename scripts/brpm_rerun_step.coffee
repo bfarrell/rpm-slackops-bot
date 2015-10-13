@@ -10,6 +10,7 @@ TOKEN_SUFFIX = '?token=' + process.env.RPM_TOKEN
 
 module.exports = (robot) ->
   robot.respond /restart step (.*)/i, (msg) ->
+    msg.send "10-4 Good buddy!"
     step = msg.match[1]
 
     input = JSON.stringify({
@@ -20,7 +21,7 @@ module.exports = (robot) ->
   	  .header('Accept', 'application/json')
       .header('Content-Type', 'application/json')
       .put(input) (err, res, body) ->
-    	
+
         if err
           msg.send "Encountered an for step #{step} error :( #{err}"
           return
@@ -38,4 +39,5 @@ module.exports = (robot) ->
           return
 
         requestId = parseInt(data.request.number)
+        msg.send "Step #{step} has been restarted"
         msg.send RPM_URL + "requests/" + requestId + TOKEN_SUFFIX
