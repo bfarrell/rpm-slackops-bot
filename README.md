@@ -12,6 +12,34 @@ has, etc!
 [hubot]: http://hubot.github.com
 [generator-hubot]: https://github.com/github/generator-hubot
 
+### Getting started
+
+#### Slack-to-BRPM
+1] Set the following environment variables:
+```
+export RPM_HOST=myserver
+export RPM_PORT=8080
+RPM_TOKEN=secret
+```
+2] Make sure the bot is a member of the channel
+
+3] Send a message with the following syntax to the channel:
+```
+<your bot> create request for app <your app> and env <your env>
+```
+
+A request will be created from a template named "Deploy <your app>" and the url to that request will be posted back in Slack
+```
+
+#### BRPM-to-Slack
+1] Create an "Incoming webhook" integration in Slack and name it "BRPM event notifier"
+
+2] Set the environment variables from the wrapper script notifications/run_event_handler_for_slack.sh according to your own environment
+  
+3] Run the wrapper script notifications/run_event_handler_for_slack.sh as a daemon
+
+Whenever a request is created or changes state the "BRPM event notifier" will post a message to the specified channel
+
 ### Running rpm-slackops-bot Locally
 
 You can test your hubot by running the following, however some plugins will not
