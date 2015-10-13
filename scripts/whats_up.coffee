@@ -18,16 +18,7 @@ RPM_URL = 'http://' + process.env.RPM_HOST + ':' + process.env.RPM_PORT + '/' + 
 RPM_REST_URL = RPM_URL + "v1/"
 TOKEN_SUFFIX = '?token=' + process.env.RPM_TOKEN
 
-find_failed_requests = (robot, msg) ->
-  now = new Date
-  earlier = new Date
-  earlier.setDate(now.getUTCDate() - DAYS_AGO)
-  filter = JSON.stringify({
-    filters: {
-      aasm_state: 'problem',
-#      started_start_date: "#{earlier.getMonth + 1}/#{earlier.getUTCDay}/#{earlier.getFullYear}",
-#      started_end_date: "#{now.getMonth + 1}/#{now.getUTCDay}/#{now.getFullYear}",
-    }})
+find_failed_requests = (robot, msg, filter) ->
   robot.http(RPM_REST_URL + "requests" + TOKEN_SUFFIX)
     .header('Content-Type', 'application/json')
     .header('Accept', 'application/json')
@@ -59,17 +50,16 @@ latest_failed_request = (robot, msg, requests) ->
   else
     msg.send 'All Clear!'
 
-
-zero_pad = (x) ->
-  if x < 10 then '0'+x else ''+x
-
-Date::pretty_string = ->
-  d = zero_pad(this.getDate())
-  m = zero_pad(this.getMonth() + 1)
-  y = this.getFullYear()
-  y + m + d
-
 module.exports = (robot) ->
   robot.respond /what\'s\ up\?/i, (msg) ->
     msg.send "I'll take a look, one second."
-    find_failed_requests(robot, msg)
+    now = new Date
+    earlier = new Date
+    earlier.setDate(now.getUTCDate() - DAYS_AGO)
+    filter = JSON.stringify({
+      filters: {
+        aasm_state: 'problem',
+#      started_start_date: "#{earlier.getMonth + 1}/#{earlier.getUTCDay}/#{earlier.getFullYear}",
+#      started_end_date: "#{now.getMonth + 1}/#{now.getUTCDay}/#{now.getFullYear}",
+      }})
+    find_failed_requests(robot, msg, filter)
