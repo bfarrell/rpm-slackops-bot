@@ -17,6 +17,7 @@ has, etc!
 #### Slack-to-BRPM
 1] Set the following environment variables:
 ```
+export RPM_CONTEXT_ROOT=brpm
 export RPM_HOST=myserver
 export RPM_PORT=8080
 RPM_TOKEN=secret
