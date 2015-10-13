@@ -52,14 +52,14 @@ module.exports = (robot) ->
 
     create_request(action, application, environment, null, null, robot, msg)
 
-  robot.respond /(create|invoke) request from template (.*) for app (.*) and env (.*)/i, (msg) ->
-    action = msg.match[1]
-    requestTemplate = msg.match[2]
-    application = msg.match[3]
-    environment = msg.match[4]
-
-    create_request(action, application, environment, requestTemplate, null, robot, msg)
-
+#  robot.respond /(create|invoke) request from template '(.*)' for app (.*) and env (.*)/i, (msg) ->
+#    action = msg.match[1]
+#    requestTemplate = msg.match[2]
+#    application = msg.match[3]
+#    environment = msg.match[4]
+#
+#    create_request(action, application, environment, requestTemplate, null, robot, msg)
+#
   robot.respond /(create|invoke) request for app (.*) and env (.*) with name (.*)/i, (msg) ->
     action = msg.match[1]
     application = msg.match[2]
@@ -68,14 +68,14 @@ module.exports = (robot) ->
 
     create_request(action, application, environment, null, requestName, robot, msg)
 
-  robot.respond /(create|invoke) request from template (.*) for app (.*) and env (.*) with name (.*)/i, (msg) ->
-    action = msg.match[1]
-    requestTemplate = msg.match[2]
-    application = msg.match[3]
-    environment = msg.match[4]
-    requestName = msg.match[5]
-
-    create_request(action, application, environment, requestTemplate, requestName, robot, msg)
+#  robot.respond /(create|invoke) request from template '(.*)' for app (.*) and env (.*) with name '(.*)'/i, (msg) ->
+#    action = msg.match[1]
+#    requestTemplate = msg.match[2]
+#    application = msg.match[3]
+#    environment = msg.match[4]
+#    requestName = msg.match[5]
+#
+#    create_request(action, application, environment, requestTemplate, requestName, robot, msg)
 
 
 
