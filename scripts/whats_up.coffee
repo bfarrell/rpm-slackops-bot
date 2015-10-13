@@ -50,8 +50,37 @@ latest_failed_request = (robot, msg, requests) ->
   else
     msg.send 'All Clear!'
 
+latest_failed_step = (robot, msg, steps) ->
+  if steps != null && steps.length > 0
+    msg.send 'I found a step in the RPM request in a problem state:'
+    bad_step = steps[steps.length-1]
+    msg.send " - Step named #{bad_step.name} with id #{parseInt(bad_step.id)}"
+  else
+    msg.send 'All Clear!'
+
+find_failed_steps = (robot, msg, filter) ->
+  robot.http(RPM_REST_URL + "steps" + TOKEN_SUFFIX)
+  .header('Content-Type', 'application/json')
+  .header('Accept', 'application/json')
+  .get(filter) (err, res, body) ->
+    if err
+      robot.emit 'error', err
+      return
+
+    if res.statusCode > 201
+      exitCode = res.statusCode
+      msg.send "Steps didn't come back with OK #{exitCode}\n" + body
+      return
+
+    data = null
+    try
+      data = JSON.parse body
+    catch parse_error
+      robot.emit 'error', parse_error
+    latest_failed_step(robot, msg, data)
+
 module.exports = (robot) ->
-  robot.respond /what\'s\ up\?/i, (msg) ->
+  robot.respond /wtf\?/i, (msg) ->
     msg.send "I'll take a look, one second."
     now = new Date
     earlier = new Date
@@ -63,3 +92,19 @@ module.exports = (robot) ->
 #      started_end_date: "#{now.getMonth + 1}/#{now.getUTCDay}/#{now.getFullYear}",
       }})
     find_failed_requests(robot, msg, filter)
+
+  robot.respond /wtf up with request (.*)?/i, (msg) ->
+    request = parseInt(msg.match[1]) - 1000
+    msg.send "I'll take a look, one second."
+    now = new Date
+    earlier = new Date
+    earlier.setDate(now.getUTCDate() - DAYS_AGO)
+    filter = JSON.stringify({
+      filters: {
+        aasm_state: 'problem',
+        request_id: "#{request}"
+      }})
+    find_failed_steps(robot, msg, filter)
+
+
+
