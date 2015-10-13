@@ -28,8 +28,7 @@ RPM_TOKEN=secret
 <your bot> create request for app <your app> and env <your env>
 ```
 
-A request will be created from a template named "Deploy <your app>" and the url to that request will be posted back in Slack
-```
+A request will be created from a template named ```Deploy <your app>``` and the url to that request will be posted back in Slack
 
 #### BRPM-to-Slack
 1] Create an "Incoming webhook" integration in Slack and name it "BRPM event notifier"

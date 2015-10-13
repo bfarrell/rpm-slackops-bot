@@ -2,7 +2,7 @@
   "name": "rpm-slackops-bot",
   "version": "0.0.0",
   "private": true,
-  "author": "Calvin Martin <calvin_martin@sliceiq.com>",
+  "author": "tolomaus <niek.bartholomeus@gmail.com>",
   "description": "A simple helpful robot for your Company",
   "dependencies": {
     "hubot": "^2.16.0",
