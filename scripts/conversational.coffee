@@ -4,6 +4,7 @@ RPM_REST_URL = RPM_URL + "v1/"
 TOKEN_SUFFIX = 'token=' + process.env.RPM_TOKEN
 
 create_request = (action, application, environment, requestTemplate, requestName, robot, msg) ->
+  msg.send "create_request was called successfully";
 
   if action is "invoke"
     execute_now = true
@@ -48,48 +49,63 @@ create_request = (action, application, environment, requestTemplate, requestName
     requestId = parseInt(data.id) + 1000
     msg.send RPM_URL + "requests/" + requestId + "?" + TOKEN_SUFFIX
 
-
+clear_global_values =() ->
+    root.app = null
+    root.environment = null
+    root.request = null
 
 get_response = (cmd) ->
   switch cmd
     when "deploy"
       # Make sure paramerts are valid
       if root.app? and root.request? and root.environment?
-        response = "Are you sure you want to redploy application #{root.app} with Request Template #{root.request} to the #{root.environment} environment?"
+        response = "Are you sure you want to redploy application *#{root.app}* with Request Template *#{root.request}* to the *#{root.environment}* environment?"
       else if root.app? and root.request?
-        response = "What environment do you want to deploy app #{root.app} with request template #{root.request}?"
+        response = "What environment do you want to deploy app *#{root.app}* with request template *#{root.request}*?\n  Please use command *\"environ is <environment_name>.\"*"
       else if root.app?
-        response = "What request template do you want to use to deploy #{root.app}?"
+        response = "What request template do you want to use to deploy *#{root.app}*?\n Please use command *\"request is <request_template_name>.\" *"
       else
-        response = "When deploying you need to supply an appication. Please use the command deploy <application_name>"
+        response = "When deploying you need to supply an application.\n Please use the command *\"deploy <application_name>\"*."
 
     when "request"
-      response = "What Environment do you want to deploy #{root.request}?"
+      response = "What Environment do you want to deploy *#{root.request}*?\n Please use command *\"environ is <environment_name>\"*."
 
     when "environment"
       if root.request? and root.environment?
-        response ="OK, Deploying #{root.request} to #{root.environment}"
+        response ="OK, Deploying *#{root.request}* to *#{root.environment}*."
       else
-        response = "Please check request and enviorment requested."
+        response = "Please check request and enviorment requested.  Please use command *\"list global values\"* ."
 
+deploy_values_set = (cmd) ->
+  if root.app? and root.enviorment? and root.request?
+    return true
+  else
+    return false
 
 module.exports = (robot) ->
 
-  robot.respond /deploy/i, (res) ->
-    res.send get_response("deploy")
+  robot.hear /yes/i, (res) ->
+    if deploy_values_set
+      create_request("invoke", root.app, root.environment, root.request, null, robot, res)
+    else
+      res.send "I can't deploy because all values aren't set."
+
+  robot.hear /no/i, (res) ->
+    res.send "Ok, I won't deploy it."
+    clear_global_values()
 
   robot.respond /deploy (.*)/i, (res) ->
     root.app = res.match[1]
     res.send get_response("deploy")
 
-  robot.respond /request (.*)/i, (res) ->
+  robot.hear /request\ is\ (.*)/i, (res) ->
     root.request = res.match[1]
     res.send get_response("request")
 
-  robot.respond /environment (.*)/i, (res) ->
+  robot.hear /environ is (.*)/i, (res) ->
     root.environment = res.match[1]
     res.send get_response("environment")
-    action = "create"
+    action = "invoke"
     create_request(action, root.app, root.environment, root.request, null, robot, res)
 
   #List the paramerters that are needed for deploying an application
@@ -102,9 +118,7 @@ module.exports = (robot) ->
         res.send "List doesn't support that command"
 
   robot.respond /clear global values/i, (res) ->
-    root.app = null
-    root.environment = null
-    root.request = null
+    clear_global_values()
 
   robot.respond /list global values/i, (res) ->
     res.send "\n
