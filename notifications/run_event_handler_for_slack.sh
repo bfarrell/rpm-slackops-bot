@@ -17,5 +17,6 @@ export EVENT_HANDLER_MESSAGING_PASSWORD=???
 export EVENT_HANDLER_SLACK_TOKEN=???
 export EVENT_HANDLER_SLACK_CHANNEL=???
 export EVENT_HANDLER_BRPM_URL=http://public_server:port
+export EVENT_HANDLER_BRPM_TOKEN=???
 
 jruby $(dirname $0)/brpm_event_notifier.rb

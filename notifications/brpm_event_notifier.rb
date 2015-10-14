@@ -28,6 +28,17 @@ class MessagingProcessor < TorqueBox::Messaging::MessageProcessor
     @slack_token = ENV["EVENT_HANDLER_SLACK_TOKEN"]
     @slack_channel = ENV["EVENT_HANDLER_SLACK_CHANNEL"]
     @brpm_url = ENV["EVENT_HANDLER_BRPM_URL"]
+    @brpm_token = ENV["EVENT_HANDLER_BRPM_TOKEN"]
+  end
+
+  def get_step_details step_id
+    rest_params = {}
+    rest_params[:url] = "#{@brpm_url}/brpm/v1/steps/#{step_id}?token=#{@brpm_token}"
+    rest_params[:method] = "get"
+    rest_params.merge!({:headers => { :accept => :json, :content_type => :json }})
+
+    response = RestClient::Request.new(rest_params).execute
+    JSON.parse(response)
   end
 
   def run
@@ -51,6 +62,22 @@ class MessagingProcessor < TorqueBox::Messaging::MessageProcessor
 
           if request_old_state["aasm-state"][0] != request_new_state["aasm-state"][0] or request_new_state["aasm-state"][0] == "complete" #TODO bug when a request is moved to complete the old state is also reported as complete
             message = "Request <#{@brpm_url}/brpm/requests/#{(request_new_state["id"][0]["content"].to_i + 1000).to_s}|#{request_new_state["name"][0]}> moved from state '#{request_old_state["aasm-state"][0]}' to state '#{request_new_state["aasm-state"][0]}'"
+          end
+        end
+      elsif event.has_key?("step")
+        print "The event is for a step #{event["event"][0]}...\n"
+        if event["event"][0] == "create"
+          step = event["step"].find { |item| item["type"] == "new" }
+          step_details = get_step_details(step["id"][0]["content"])
+
+          message = "Step <#{@brpm_url}/brpm/requests/#{(step_details["request"]["id"].to_i + 1000).to_s}|#{step_details["request"]["name"]} - #{step["name"][0]}> created"
+        elsif event["event"][0] == "update"
+          step_old_state = event["step"].find { |item| item["type"] == "old" }
+          step_new_state = event["step"].find { |item| item["type"] == "new" }
+          step_details = get_step_details(step_new_state["id"][0]["content"])
+
+          if step_old_state["aasm-state"][0] != step_new_state["aasm-state"][0] or step_new_state["aasm-state"][0] == "complete" #TODO bug when a request is moved to complete the old state is also reported as complete
+            message = "Step <#{@brpm_url}/brpm/requests/#{(step_details["request"]["id"].to_i + 1000).to_s}|#{step_details["request"]["name"]} - #{step_new_state["name"][0]}> moved from state '#{step_old_state["aasm-state"][0]}' to state '#{step_new_state["aasm-state"][0]}'"
           end
         end
       end
