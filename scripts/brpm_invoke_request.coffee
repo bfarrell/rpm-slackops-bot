@@ -1,3 +1,14 @@
+# Description:
+#   creates and optionally starts a request
+#
+# Configuration:
+#   RPM_HOST RPM_PORT RPM_TOKEN
+#
+# Commands:
+#   hubot invoke request for app X and env Y
+#   hubot invoke request for app X and env Y with name Z
+#
+
 RPM_URL = 'http://' + process.env.RPM_HOST + ':' + process.env.RPM_PORT + '/brpm/'
 RPM_REST_URL = RPM_URL + "v1/"
 TOKEN_SUFFIX = '?token=' + process.env.RPM_TOKEN
@@ -11,6 +22,7 @@ create_request = (action, application, environment, requestTemplate, requestName
   requestName = requestName || "Deploy " + application + " to " + environment
 
   msg.send action + " request from template '" + requestTemplate + "' for app " + application + " and env " + environment + " with name '" + requestName + "'..."
+
   data = JSON.stringify(
     {
       "request":
@@ -21,6 +33,7 @@ create_request = (action, application, environment, requestTemplate, requestName
         "environment": environment
         "execute_now": execute_now
     })
+
   robot.http(RPM_REST_URL + "requests" + TOKEN_SUFFIX)
   .header('Accept', 'application/json')
   .header('Content-Type', 'application/json')
