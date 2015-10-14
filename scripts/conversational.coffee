@@ -1,5 +1,55 @@
 oot = exports ? this
 
+RPM_URL = 'http://' + process.env.RPM_HOST + ':' + process.env.RPM_PORT + '/brpm/'
+RPM_REST_URL = RPM_URL + "v1/"
+TOKEN_SUFFIX = 'token=' + process.env.RPM_TOKEN
+
+create_request = (action, application, environment, requestTemplate, requestName, robot, msg) ->
+
+  if action is "invoke"
+    execute_now = true
+  else
+    execute_now = false
+  requestTemplate = requestTemplate || "Deploy " + application
+  requestName = requestName || "Deploy " + application + " to " + environment
+
+  msg.send action + " request from template '" + requestTemplate + "' for app " + application + " and env " + environment + " with name '" + requestName + "'..."
+
+  data = JSON.stringify(
+    {
+      "request":
+        "requestor_id": 1
+        "deployment_coordinator_id": 1
+        "name": requestName
+        "template_name": requestTemplate
+        "environment": environment
+        "execute_now": execute_now
+    })
+
+  robot.http(RPM_REST_URL + "requests?" + TOKEN_SUFFIX)
+  .header('Accept', 'application/json')
+  .header('Content-Type', 'application/json')
+  .post(data) (err, res, body) ->
+    if err
+      msg.send "Encountered an error :( #{err}"
+      return
+
+    if res.statusCode isnt 201
+      exitCode = res.statusCode
+      msg.send "Request didn't come back with OK #{exitCode}\n" + body
+      return
+
+    data = null
+    try
+      data = JSON.parse body
+    catch error
+      msg.send "Ran into an error parsing JSON :("
+      return
+
+    requestId = parseInt(data.id) + 1000
+    msg.send RPM_URL + "requests/" + requestId + "?" + TOKEN_SUFFIX
+
+
 get_response = (cmd) ->
   switch cmd
     when "deploy"
