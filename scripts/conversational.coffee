@@ -1,5 +1,4 @@
-oot = exports ? this
-
+root = exports ? this
 RPM_URL = 'http://' + process.env.RPM_HOST + ':' + process.env.RPM_PORT + '/brpm/'
 RPM_REST_URL = RPM_URL + "v1/"
 TOKEN_SUFFIX = 'token=' + process.env.RPM_TOKEN
@@ -50,6 +49,7 @@ create_request = (action, application, environment, requestTemplate, requestName
     msg.send RPM_URL + "requests/" + requestId + "?" + TOKEN_SUFFIX
 
 
+
 get_response = (cmd) ->
   switch cmd
     when "deploy"
@@ -90,7 +90,7 @@ module.exports = (robot) ->
     root.environment = res.match[1]
     res.send get_response("environment")
     action = "create"
-    create_request(action, root.app, root.environment, root.request, null, robot, msg)
+    create_request(action, root.app, root.environment, root.request, null, robot, res)
 
   #List the paramerters that are needed for deploying an application
   robot.respond /list (.*) parameters/i, (res) ->
