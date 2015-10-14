@@ -37,7 +37,6 @@ get_component_versions = (application, environment, robot, msg) ->
     for component in data
       versions_content += "  " + component.application_component.component.name + ": " + component.version + "\n" if component.version
 
-    console.log versions_content
     msg.send versions_content
 
 module.exports = (robot) ->
