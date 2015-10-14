@@ -6,8 +6,8 @@
 #
 # Commands:
 #   hubot wtf? - shows latest failed request information
-#   hubot wtf up with request 123? - shows latest failed steps information for the request
-#   hubot wtf happened with request 123? - shows the 10 latest activities for the request
+#   hubot wtf up with request <id>? - information about a request
+#   hubot wtf up with environment <id>? - information about an environment
 #
 
 DAYS_AGO = 3
@@ -43,7 +43,7 @@ latest_failed_request = (robot, msg, requests) ->
     bad_request = requests[requests.length-1]
     msg.send " - Request named #{bad_request.name} with id #{parseInt(bad_request.id) + 1000}"
     msg.send " - for application #{bad_request.apps[0].name}"
-    msg.send " - deployed to environment #{bad_request.environment.name}"
+    msg.send " - deployed to environment #{bad_request.environment.name} with id #{bad_request.environment.id}"
   else
     msg.send 'All Clear!'
 
@@ -131,6 +131,19 @@ module.exports = (robot) ->
         request_id: "#{request}"
       }})
     find_failed_steps(robot, msg, filter)
+
+  robot.respond /wtf up with environment (.*)?/i, (msg) ->
+    environment = parseInt(msg.match[1])
+    msg.send "I'll take a look, one second."
+    now = new Date
+    earlier = new Date
+    earlier.setDate(now.getUTCDate() - DAYS_AGO)
+    filter = JSON.stringify({
+      filters: {
+        aasm_state: 'problem',
+        environment_id: "#{environment}"
+      }})
+    find_failed_requests(robot, msg, filter)
 
   robot.respond /wtf happened with request (.*)?/i, (msg) ->
     requestId = parseInt(msg.match[1]) - 1000
