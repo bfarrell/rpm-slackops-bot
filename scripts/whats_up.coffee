@@ -5,21 +5,18 @@
 #   RPM_HOST RPM_PORT RPM_TOKEN RPM_CONTEXT_ROOT
 #
 # Commands:
-#   hubot what's up? - shows latest failed request information
+#   hubot wtf? - shows latest failed request information
+#   hubot wtf up with request 123? - shows latest failed steps information for the request
+#   hubot wtf happened with request 123? - shows the 10 latest activities for the request
 #
 
 DAYS_AGO = 3
-if process.env.RPM_CONTEXT_ROOT == null
-  context_root = 'brpm/'
-else
-  context_root = process.env.RPM_CONTEXT_ROOT + '/'
-
-RPM_URL = 'http://' + process.env.RPM_HOST + ':' + process.env.RPM_PORT + '/' + context_root
+RPM_URL = 'http://' + process.env.RPM_HOST + ':' + process.env.RPM_PORT + '/' + (process.env.RPM_CONTEXT_ROOT || "brpm/")
 RPM_REST_URL = RPM_URL + "v1/"
-TOKEN_SUFFIX = '?token=' + process.env.RPM_TOKEN
+TOKEN_SUFFIX = 'token=' + process.env.RPM_TOKEN
 
 find_failed_requests = (robot, msg, filter) ->
-  robot.http(RPM_REST_URL + "requests" + TOKEN_SUFFIX)
+  robot.http(RPM_REST_URL + "requests?" + TOKEN_SUFFIX)
     .header('Content-Type', 'application/json')
     .header('Accept', 'application/json')
     .get(filter) (err, res, body) ->
@@ -59,7 +56,7 @@ latest_failed_step = (robot, msg, steps) ->
     msg.send 'All Clear!'
 
 find_failed_steps = (robot, msg, filter) ->
-  robot.http(RPM_REST_URL + "steps" + TOKEN_SUFFIX)
+  robot.http(RPM_REST_URL + "steps?" + TOKEN_SUFFIX)
   .header('Content-Type', 'application/json')
   .header('Accept', 'application/json')
   .get(filter) (err, res, body) ->
@@ -78,6 +75,35 @@ find_failed_steps = (robot, msg, filter) ->
     catch parse_error
       robot.emit 'error', parse_error
     latest_failed_step(robot, msg, data)
+
+find_activity_logs = (robot, msg, requestId, callback) ->
+  url = RPM_REST_URL + "activity_logs?filters[request_id]=" + requestId + "&" + TOKEN_SUFFIX
+  console.log url
+  robot.http(url)
+  .header('Content-Type', 'application/json')
+  .header('Accept', 'application/json')
+  .get() (err, res, body) ->
+    if err
+      robot.emit 'error', err
+      return
+
+    if res.statusCode > 201
+      exitCode = res.statusCode
+      msg.send "Steps didn't come back with OK #{exitCode}\n" + body
+      return
+
+    data = null
+    try
+      data = JSON.parse body
+    catch parse_error
+      robot.emit 'error', parse_error
+
+    callback(data, msg)
+
+respond_activity_logs = (activity_logs, msg) ->
+  msg.send "Showing the 10 last actions that happened on this request:"
+  for activity_log in activity_logs[..10]
+    msg.send "On "+ activity_log.created_at + " by " + activity_log.user.login + ":\n" + activity_log.activity
 
 module.exports = (robot) ->
   robot.respond /wtf\?/i, (msg) ->
@@ -105,6 +131,11 @@ module.exports = (robot) ->
         request_id: "#{request}"
       }})
     find_failed_steps(robot, msg, filter)
+
+  robot.respond /wtf happened with request (.*)?/i, (msg) ->
+    requestId = parseInt(msg.match[1]) - 1000
+    msg.send "I'll take a look, one second."
+    find_activity_logs(robot, msg, requestId, respond_activity_logs)
 
 
 
