@@ -11,7 +11,7 @@
 
 RPM_URL = 'http://' + process.env.RPM_HOST + ':' + process.env.RPM_PORT + '/brpm/'
 RPM_REST_URL = RPM_URL + "v1/"
-TOKEN_SUFFIX = '?token=' + process.env.RPM_TOKEN
+TOKEN_SUFFIX = 'token=' + process.env.RPM_TOKEN
 
 create_request = (action, application, environment, requestTemplate, requestName, robot, msg) ->
   if action is "invoke"
@@ -34,7 +34,7 @@ create_request = (action, application, environment, requestTemplate, requestName
         "execute_now": execute_now
     })
 
-  robot.http(RPM_REST_URL + "requests" + TOKEN_SUFFIX)
+  robot.http(RPM_REST_URL + "requests?" + TOKEN_SUFFIX)
   .header('Accept', 'application/json')
   .header('Content-Type', 'application/json')
   .post(data) (err, res, body) ->
@@ -55,7 +55,7 @@ create_request = (action, application, environment, requestTemplate, requestName
       return
 
     requestId = parseInt(data.id) + 1000
-    msg.send RPM_URL + "requests/" + requestId + TOKEN_SUFFIX
+    msg.send RPM_URL + "requests/" + requestId + "?" + TOKEN_SUFFIX
 
 module.exports = (robot) ->
   robot.respond /(create|invoke) request for app (.*) and env (.*)/i, (msg) ->

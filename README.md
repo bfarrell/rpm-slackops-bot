@@ -20,7 +20,7 @@ has, etc!
 export RPM_CONTEXT_ROOT=brpm
 export RPM_HOST=myserver
 export RPM_PORT=8080
-RPM_TOKEN=secret
+export RPM_TOKEN=secret
 ```
 2] Make sure the bot is a member of the channel
 
