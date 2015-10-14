@@ -13,7 +13,7 @@ RPM_URL = 'http://' + process.env.RPM_HOST + ':' + process.env.RPM_PORT + '/' + 
 RPM_REST_URL = RPM_URL + "v1/"
 TOKEN_SUFFIX = 'token=' + process.env.RPM_TOKEN
 
-RESPONSES = ['Anytime!', 'You betcha!', 'You got it!', 'it was nothin', 'It\'s my job.']
+RESPONSES = ["Anytime!", "You betcha!", "You got it!", "It was nothin", "I'm a bot.. It's my job."]
 
 module.exports = (robot) ->
   robot.respond /thanks/i, (res) ->
