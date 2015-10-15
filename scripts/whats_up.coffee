@@ -8,6 +8,7 @@
 #   hubot wtf? - shows latest failed request information
 #   hubot wtf up with request <id>? - information about a request
 #   hubot wtf up with environment <id>? - information about an environment
+#   hubot wtf happened with request <id>? - shows the 10 latest activities for the request
 #
 
 DAYS_AGO = 3
