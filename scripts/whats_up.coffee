@@ -9,6 +9,7 @@
 #   hubot wtf up with request <id>? - information about a request
 #   hubot wtf up with environment <id>? - information about an environment
 #   hubot wtf happened with request <id>? - shows the 10 latest activities for the request
+#   hubot wtf up with env <id>? - information about an environment
 #
 
 DAYS_AGO = 3
@@ -25,7 +26,7 @@ find_failed_requests = (robot, msg, filter) ->
         robot.emit 'error', err
         return
 
-      if res.statusCode > 201
+      if res.statusCode != 404 && res.statusCode > 201
         exitCode = res.statusCode
         msg.send "Request didn't come back with OK #{exitCode}\n" + body
         return
@@ -65,7 +66,7 @@ find_failed_steps = (robot, msg, filter) ->
       robot.emit 'error', err
       return
 
-    if res.statusCode > 201
+    if res.statusCode != 404 && res.statusCode > 201
       exitCode = res.statusCode
       msg.send "Steps didn't come back with OK #{exitCode}\n" + body
       return
@@ -88,7 +89,7 @@ find_activity_logs = (robot, msg, requestId, callback) ->
       robot.emit 'error', err
       return
 
-    if res.statusCode > 201
+    if res.statusCode != 404 && res.statusCode > 201
       exitCode = res.statusCode
       msg.send "Steps didn't come back with OK #{exitCode}\n" + body
       return
@@ -108,10 +109,6 @@ respond_activity_logs = (activity_logs, msg) ->
 
 module.exports = (robot) ->
   robot.respond /wtf\?/i, (msg) ->
-    msg.send "I'll take a look, one second."
-    now = new Date
-    earlier = new Date
-    earlier.setDate(now.getUTCDate() - DAYS_AGO)
     filter = JSON.stringify({
       filters: {
         aasm_state: 'problem',
@@ -122,10 +119,6 @@ module.exports = (robot) ->
 
   robot.respond /wtf up with request (.*)?/i, (msg) ->
     request = parseInt(msg.match[1]) - 1000
-    msg.send "I'll take a look, one second."
-    now = new Date
-    earlier = new Date
-    earlier.setDate(now.getUTCDate() - DAYS_AGO)
     filter = JSON.stringify({
       filters: {
         aasm_state: 'problem',
@@ -133,12 +126,8 @@ module.exports = (robot) ->
       }})
     find_failed_steps(robot, msg, filter)
 
-  robot.respond /wtf up with environment (.*)?/i, (msg) ->
+  robot.respond /wtf up with env (.*)?/i, (msg) ->
     environment = parseInt(msg.match[1])
-    msg.send "I'll take a look, one second."
-    now = new Date
-    earlier = new Date
-    earlier.setDate(now.getUTCDate() - DAYS_AGO)
     filter = JSON.stringify({
       filters: {
         aasm_state: 'problem',
