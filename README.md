@@ -13,18 +13,20 @@ has, etc!
 [generator-hubot]: https://github.com/github/generator-hubot
 
 ### Getting started
-
 #### Slack-to-BRPM
-1] Set the following environment variables:
+1] Go to Slack and generate a webook for a Hubot Integration
+2] Customize your bot's name and image and copy the api token
+3] Set the following environment variables on your host running Hubot:
 ```
 export RPM_CONTEXT_ROOT=brpm
 export RPM_HOST=myserver
 export RPM_PORT=8080
 export RPM_TOKEN=secret
+export HUBOT_SLACK_TOKEN=<api token from above>
 ```
-2] Make sure the bot is a member of the channel
+4] Make sure the bot is a member of the channel (invite if not)
 
-3] Send a message with the following syntax to the channel:
+5] Send a message with the following syntax to the channel:
 ```
 <your bot> create request for app <your app> and env <your env>
 ```
