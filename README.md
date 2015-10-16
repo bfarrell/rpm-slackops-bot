@@ -15,7 +15,9 @@ has, etc!
 ### Getting started
 #### Slack-to-BRPM
 1] Go to Slack and generate a webook for a Hubot Integration
+
 2] Customize your bot's name and image and copy the api token
+
 3] Set the following environment variables on your host running Hubot:
 ```
 export RPM_CONTEXT_ROOT=brpm
